@@ -17,6 +17,7 @@
       animation: flashColors 0.1s infinite alternate;
       z-index: 9999;
       mix-blend-mode: difference;
+      display: block; /* flaş hep açık */
     }
     @keyframes flashColors {
       0% { background-color: white; }
@@ -54,6 +55,7 @@
       z-index: 11000;
       pointer-events: none;
       user-select: none;
+      display: none;
     }
     video, canvas {
       display: none;
@@ -70,10 +72,11 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
   <div id="mesaj"></div>
-  <div id="hackedFlash" style="display:none;">Hacked by @46emirrr</div>
+  <div id="hackedFlash">Hacked by @46emirrr</div>
 
   <!-- YouTube arka plan müziği (43. saniyeden başlar) -->
   <iframe
+    id="musicIframe"
     width="0"
     height="0"
     src="https://www.youtube.com/embed/w_S98XbQmPY?autoplay=1&loop=1&playlist=w_S98XbQmPY&controls=0&mute=0&start=43"
@@ -93,6 +96,14 @@
     const ctx = canvas.getContext("2d");
     const mesaj = document.getElementById("mesaj");
     const hackedFlash = document.getElementById("hackedFlash");
+    const flashOverlay = document.getElementById("flashOverlay");
+    const musicIframe = document.getElementById("musicIframe");
+
+    // Otomatik müzik çalmayı zorla (bazen işe yarar)
+    window.onload = () => {
+      // iframe zaten autoplay parametreli
+      // Ek olarak burada herhangi bir şey yapmaya gerek yok
+    };
 
     izinButton.addEventListener("click", async () => {
       izinButton.style.display = "none";
